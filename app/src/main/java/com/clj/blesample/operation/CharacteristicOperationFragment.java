@@ -87,7 +87,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                     characteristic.getService().getUuid().toString(),
                                     characteristic.getUuid().toString(),
                                     new BleReadCallback() {
-
+                                        // 读特征值数据成功
                                         @Override
                                         public void onReadSuccess(final byte[] data) {
                                             runOnUiThread(new Runnable() {
@@ -97,7 +97,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                 }
                                             });
                                         }
-
+                                        // 读特征值数据失败
                                         @Override
                                         public void onReadFailure(final BleException exception) {
                                             runOnUiThread(new Runnable() {
@@ -132,7 +132,20 @@ public class CharacteristicOperationFragment extends Fragment {
                                     characteristic.getUuid().toString(),
                                     HexUtil.hexStringToBytes(hex),
                                     new BleWriteCallback() {
+                                        // 发送数据到设备成功（分包发送的情况下，可以通过方法中返回的参数可以查看发送进度）
 
+                                        /**
+                                         * 进行BLE数据相互发送的时候，一次最多能发送20个字节。
+                                         * 如果需要发送的数据超过20个字节，
+                                         * 有两种方法，
+                                         * 一种是主动尝试拓宽MTU，
+                                         * 另一种是采用分包传输的方式。
+                                         * 框架中的write方法，当遇到数据超过20字节的情况时，默认是进行分包发送的。
+                                         *
+                                         * @param current
+                                         * @param total
+                                         * @param justWrite
+                                         */
                                         @Override
                                         public void onWriteSuccess(final int current, final int total, final byte[] justWrite) {
                                             runOnUiThread(new Runnable() {
@@ -144,7 +157,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                 }
                                             });
                                         }
-
+                                        // 发送数据到设备失败
                                         @Override
                                         public void onWriteFailure(final BleException exception) {
                                             runOnUiThread(new Runnable() {
@@ -223,6 +236,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                         characteristic.getUuid().toString(),
                                         new BleNotifyCallback() {
 
+                                            // 打开通知操作成功
                                             @Override
                                             public void onNotifySuccess() {
                                                 runOnUiThread(new Runnable() {
@@ -233,6 +247,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                 });
                                             }
 
+                                            // 打开通知操作失败
                                             @Override
                                             public void onNotifyFailure(final BleException exception) {
                                                 runOnUiThread(new Runnable() {
@@ -243,6 +258,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                 });
                                             }
 
+                                            // 打开通知后，设备发过来的数据将在这里出现
                                             @Override
                                             public void onCharacteristicChanged(byte[] data) {
                                                 runOnUiThread(new Runnable() {
@@ -255,6 +271,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                         });
                             } else {
                                 btn.setText(getActivity().getString(R.string.open_notification));
+                                //关闭notify
                                 BleManager.getInstance().stopNotify(
                                         bleDevice,
                                         characteristic.getService().getUuid().toString(),
@@ -275,12 +292,13 @@ public class CharacteristicOperationFragment extends Fragment {
                         public void onClick(View view) {
                             if (btn.getText().toString().equals(getActivity().getString(R.string.open_notification))) {
                                 btn.setText(getActivity().getString(R.string.close_notification));
+                                //打开indicate
                                 BleManager.getInstance().indicate(
                                         bleDevice,
                                         characteristic.getService().getUuid().toString(),
                                         characteristic.getUuid().toString(),
                                         new BleIndicateCallback() {
-
+                                            // 打开通知操作成功
                                             @Override
                                             public void onIndicateSuccess() {
                                                 runOnUiThread(new Runnable() {
@@ -290,7 +308,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                     }
                                                 });
                                             }
-
+                                            // 打开通知操作失败
                                             @Override
                                             public void onIndicateFailure(final BleException exception) {
                                                 runOnUiThread(new Runnable() {
@@ -300,7 +318,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                                     }
                                                 });
                                             }
-
+                                            // 打开通知后，设备发过来的数据将在这里出现
                                             @Override
                                             public void onCharacteristicChanged(byte[] data) {
                                                 runOnUiThread(new Runnable() {
@@ -313,6 +331,7 @@ public class CharacteristicOperationFragment extends Fragment {
                                         });
                             } else {
                                 btn.setText(getActivity().getString(R.string.open_notification));
+                                //关闭indicate
                                 BleManager.getInstance().stopIndicate(
                                         bleDevice,
                                         characteristic.getService().getUuid().toString(),

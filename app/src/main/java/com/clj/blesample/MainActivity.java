@@ -226,10 +226,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startScan() {
-        /**
-         * 会回到主线程，参数表示本次扫描动作是否开启成功。由于蓝牙没有打开，
-         * 上一次扫描没有结束等原因，会造成扫描开启失败。
-         */
+        //会回到主线程，参数表示本次扫描动作是否开启成功。由于蓝牙没有打开，
+        //上一次扫描没有结束等原因，会造成扫描开启失败。
         BleManager.getInstance().scan(new BleScanCallback() {
             @Override
             public void onScanStarted(boolean success) {
@@ -240,17 +238,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btn_scan.setText(getString(R.string.stop_scan));
             }
 
+            /**
+             * 扫描过程中所有被扫描到的结果回调。由于扫描及过滤的过程是在工作线程中的，
+             * 此方法也处于工作线程中。同一个设备会在不同的时间，携带自身不同的状态（比如信号强度等），
+             * 出现在这个回调方法中，出现次数取决于周围的设备量及外围设备的广播间隔。
+             * @param bleDevice
+             */
             @Override
             public void onLeScan(BleDevice bleDevice) {
                 super.onLeScan(bleDevice);
             }
 
+            //扫描过程中的所有过滤后的结果回调。与onLeScan区别之处在于：它会回到主线程；同一个设备只会出现一次；
+            //出现的设备是经过扫描过滤规则过滤后的设备。
             @Override
             public void onScanning(BleDevice bleDevice) {
                 mDeviceAdapter.addDevice(bleDevice);
                 mDeviceAdapter.notifyDataSetChanged();
             }
 
+            //本次扫描时段内所有被扫描且过滤后的设备集合。它会回到主线程，相当于onScanning设备之和
             @Override
             public void onScanFinished(List<BleDevice> scanResultList) {
                 img_loading.clearAnimation();
@@ -262,11 +269,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void connect(final BleDevice bleDevice) {
         BleManager.getInstance().connect(bleDevice, new BleGattCallback() {
+
+            //开始进行连接
             @Override
             public void onStartConnect() {
                 progressDialog.show();
             }
 
+            //连接不成功
             @Override
             public void onConnectFail(BleDevice bleDevice, BleException exception) {
                 img_loading.clearAnimation();
@@ -276,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, getString(R.string.connect_fail), Toast.LENGTH_LONG).show();
             }
 
+            //连接成功并发现服务
             @Override
             public void onConnectSuccess(BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 progressDialog.dismiss();
@@ -283,6 +294,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mDeviceAdapter.notifyDataSetChanged();
             }
 
+            /**
+             * 连接断开，特指连接后再断开的情况。在这里可以监控设备的连接状态，一旦连接断开，
+             * 可以根据自身情况考虑对BleDevice对象进行重连操作。需要注意的是，断开和重连之间最好间隔一段时间，
+             * 否则可能会出现长时间连接不上的情况。此外，如果通过调用disconnect(BleDevice bleDevice)方法，
+             * 主动断开蓝牙连接的结果也会在这个方法中回调，此时isActiveDisConnected将会是true。
+             *
+             * @param isActiveDisConnected
+             * @param bleDevice
+             * @param gatt
+             * @param status
+             */
             @Override
             public void onDisConnected(boolean isActiveDisConnected, BleDevice bleDevice, BluetoothGatt gatt, int status) {
                 progressDialog.dismiss();
@@ -301,29 +323,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    //获取设备的实时信号强度Rssi
     private void readRssi(BleDevice bleDevice) {
         BleManager.getInstance().readRssi(bleDevice, new BleRssiCallback() {
             @Override
             public void onRssiFailure(BleException exception) {
+                // 读取设备的信号强度失败
                 Log.i(TAG, "onRssiFailure" + exception.toString());
             }
 
             @Override
             public void onRssiSuccess(int rssi) {
+                // 读取设备的信号强度成功
                 Log.i(TAG, "onRssiSuccess: " + rssi);
             }
         });
     }
 
+    /**
+     * 设置最大传输单元MTU
+     *
+     * <p>
+     * 进行BLE数据相互发送的时候，一次最多能发送20个字节。
+     * 如果需要发送的数据超过20个字节，有两种方法，
+     * 一种是主动尝试拓宽MTU，
+     * 另一种是采用分包传输的方式。
+     * 框架中的write方法，当遇到数据超过20字节的情况时，默认是进行分包发送的。
+     *</p>
+     * @param bleDevice
+     * @param mtu
+     */
     private void setMtu(BleDevice bleDevice, int mtu) {
         BleManager.getInstance().setMtu(bleDevice, mtu, new BleMtuChangedCallback() {
             @Override
             public void onSetMTUFailure(BleException exception) {
+                // 设置MTU失败
                 Log.i(TAG, "onsetMTUFailure" + exception.toString());
             }
 
             @Override
             public void onMtuChanged(int mtu) {
+                // 设置MTU成功，并获得当前设备传输支持的MTU值
                 Log.i(TAG, "onMtuChanged: " + mtu);
             }
         });

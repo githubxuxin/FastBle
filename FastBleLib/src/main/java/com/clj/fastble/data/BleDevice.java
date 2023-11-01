@@ -5,7 +5,21 @@ import android.bluetooth.BluetoothDevice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
+/**
+ * 设备信息
+ * <p>
+ *     扫描得到的BLE外围设备，会以BleDevice对象的形式，作为后续操作的最小单位对象。
+ *     它本身含有这些信息：
+ *          String getName():蓝牙广播名
+ *          String getMac():蓝牙Mac地址
+ *          byte[] getScanRecord()： 被扫描到时候携带的广播数据
+ *          int getRssi() ：被扫描到时候的信号强度
+ * </p>
+ * <p>
+ *     后续进行设备连接、断开、判断设备状态，读写操作等时候，都会用到这个对象。
+ *     可以把它理解为外围蓝牙设备的载体，所有对外围蓝牙设备的操作，都通过这个对象来传导。
+ * </p>
+ */
 public class BleDevice implements Parcelable {
 
     private BluetoothDevice mDevice;

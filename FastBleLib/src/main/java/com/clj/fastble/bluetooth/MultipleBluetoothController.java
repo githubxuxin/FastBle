@@ -15,6 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * MultipleBluetoothController就是控制多设备连接的。
+ * 它里面有增加和移除设备的方法，
+ * 如下图的addBleBluetooth和removeBleBluetooth，传入的参数就是BleBluetooth对象，验证了上面的说法。
+ *
+ * 作者：陈利健
+ * 链接：https://www.jianshu.com/p/795bb0a08beb
+ * 来源：简书
+ * 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+ */
 public class MultipleBluetoothController {
 
     private final BleLruHashMap<String, BleBluetooth> bleLruHashMap;

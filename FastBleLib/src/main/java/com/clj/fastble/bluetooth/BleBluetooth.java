@@ -164,6 +164,7 @@ public class BleBluetooth {
 
         lastState = LastState.CONNECT_CONNECTING;
 
+        //调用了原生API中的BluetoothDevice的connectGatt()方法
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             bluetoothGatt = bleDevice.getDevice().connectGatt(BleManager.getInstance().getContext(),
                     autoConnect, coreGattCallback, TRANSPORT_LE);
@@ -244,9 +245,9 @@ public class BleBluetooth {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case BleMsg.MSG_CONNECT_FAIL: {
-                    disconnectGatt();
+                    disconnectGatt(); //断开已建立的连接，或取消当前正在进行的连接尝试
                     refreshDeviceCache();
-                    closeBluetoothGatt();
+                    closeBluetoothGatt();//Close this Bluetooth GATT client
 
                     if (connectRetryCount < BleManager.getInstance().getReConnectCount()) {
                         BleLog.e("Connect fail, try reconnect " + BleManager.getInstance().getReConnectInterval() + " millisecond later");
@@ -355,6 +356,7 @@ public class BleBluetooth {
         }
     }
 
+    //对操作回调结果做了封装和分发
     private BluetoothGattCallback coreGattCallback = new BluetoothGattCallback() {
 
         @Override

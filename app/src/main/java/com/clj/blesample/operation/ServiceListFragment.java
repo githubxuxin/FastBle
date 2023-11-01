@@ -118,7 +118,6 @@ public class ServiceListFragment extends Fragment {
                 holder.txt_uuid = (TextView) convertView.findViewById(R.id.txt_uuid);
                 holder.txt_type = (TextView) convertView.findViewById(R.id.txt_type);
             }
-
             BluetoothGattService service = bluetoothGattServices.get(position);
             String uuid = service.getUuid().toString();
 
