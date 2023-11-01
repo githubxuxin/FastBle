@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         BleManager.getInstance().init(getApplication());
         BleManager.getInstance()
-                .enableLog(true)
-                .setReConnectCount(1, 5000)
-                .setConnectOverTime(20000)
-                .setOperateTimeout(5000);
+                .enableLog(true)   //是否显示框架内部日志
+                .setReConnectCount(1, 5000) //重试次数以及重连间隔，单位毫秒
+                .setConnectOverTime(20000) //连接超时时间，单位毫秒
+                .setOperateTimeout(5000);  //操作时间，单位毫秒
     }
 
     @Override
@@ -226,6 +226,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startScan() {
+        /**
+         * 会回到主线程，参数表示本次扫描动作是否开启成功。由于蓝牙没有打开，
+         * 上一次扫描没有结束等原因，会造成扫描开启失败。
+         */
         BleManager.getInstance().scan(new BleScanCallback() {
             @Override
             public void onScanStarted(boolean success) {
@@ -325,6 +329,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    /**
+     * 1.所有安卓一定要先把权限请了
+     * 2.检查权限时，由于会在机器上弹出选择框，当你选择完是否获取权限后，执行onRequestPermissionResult回调函数，获取选择的结果
+     * 3.检查权限时，机器弹出选择框，这时，继续执行检查权限后的语句，不会等待你选完是否获取，这个过程是异步的，容易出现问题
+     * 4.所以一般是在执行onRequestPermissionResult之后确认获取权限的位置之后，再进行相关函数的执行。
+     * ————————————————
+     * 版权声明：本文为CSDN博主「武凯的博客」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+     * 原文链接：https://blog.csdn.net/qq_35415875/article/details/120303803
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public final void onRequestPermissionsResult(int requestCode,
                                                  @NonNull String[] permissions,
@@ -369,6 +385,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void onPermissionGranted(String permission) {
         switch (permission) {
             case Manifest.permission.ACCESS_FINE_LOCATION:
+                /**
+                 * 6.0及以上机型需要动态获取位置权限
+                 * 蓝牙打开之后，进行扫描之前，需要判断下当前设备是否是6.0及以上，
+                 * 如果是，需要动态获取之前在Manifest中声明的位置权限
+                 */
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkGPSIsOpen()) {
                     new AlertDialog.Builder(this)
                             .setTitle(R.string.notifyTitle)

@@ -75,6 +75,10 @@ public class BleManager {
     public void init(Application app) {
         if (context == null && app != null) {
             context = app;
+            /**
+             * 判断当前Android设备是否支持BLE
+             * Android 4.3以后系统中加入了蓝牙BLE的功能
+             */
             if (isSupportBle()) {
                 bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
             }
@@ -750,7 +754,8 @@ public class BleManager {
                 && context.getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-    /**
+    /**主动打开蓝牙
+     * 方法1：通过蓝牙适配器直接打开蓝牙
      * Open bluetooth
      */
     public void enableBluetooth() {
@@ -770,6 +775,11 @@ public class BleManager {
     }
 
     /**
+     * 判断当前Android设备的蓝牙是否已经打开
+     * 可以直接调用下面的判断方法来判断本机是否已经打开了蓝牙，如果没有，向用户抛出提示
+     * BleManager.getInstance().isBlueEnable();
+     *
+     *
      * judge Bluetooth is enable
      *
      * @return
