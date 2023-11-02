@@ -178,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         for (BleDevice bleDevice : deviceList) {
             mDeviceAdapter.addDevice(bleDevice);
         }
+        //通知适配器更新数据
         mDeviceAdapter.notifyDataSetChanged();
     }
 

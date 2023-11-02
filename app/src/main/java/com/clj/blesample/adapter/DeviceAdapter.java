@@ -63,11 +63,13 @@ public class DeviceAdapter extends BaseAdapter {
         clearScanDevice();
     }
 
+    //获取数量（设置ListView的长度）
     @Override
     public int getCount() {
         return bleDeviceList.size();
     }
 
+    //获取子项
     @Override
     public BleDevice getItem(int position) {
         if (position > bleDeviceList.size())
@@ -75,17 +77,32 @@ public class DeviceAdapter extends BaseAdapter {
         return bleDeviceList.get(position);
     }
 
+    //获取子项id
     @Override
     public long getItemId(int position) {
         return 0;
     }
 
+    //获取视图（设置ListView每一项的显示效果）
+
+    /**
+     *
+     * @param position  索引
+     * @param convertView view本身
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        //ListView优化代码，不用每次都创建
         ViewHolder holder;
+        //只执行一次 缓存到RecycleBin中
         if (convertView != null) {
+            //通过getTag()取出ViewHolder对象，然后能直接获得holder,控件的方式在外面直接操作控件
+            //而事实上，getTag()本身操作效率高
             holder = (ViewHolder) convertView.getTag();
         } else {
+            //优化1：利用进入RecycleBin中的View，减少读view的赋值
             convertView = View.inflate(context, R.layout.adapter_device, null);
             holder = new ViewHolder();
             convertView.setTag(holder);
@@ -154,6 +171,12 @@ public class DeviceAdapter extends BaseAdapter {
         return convertView;
     }
 
+    //1.自定义一个类，叫做ViewHolder
+    //2.将需要保存的视图声明为公开的属性
+    //3.什么时候保存？当view为null时，完成对ViewHolder的实例化工作，并为各个控件属性赋值
+    //4.什么时候用？什么时候都要用（性能的提升实在view不为null时体现）
+    //5.怎么用？当view为null时，完成了ViewHolder及内部控件属性的初始化工作后，调用一句代码 convertView.setTag(holder);
+    //当view不为null时，holder = (ViewHolder) convertView.getTag();
     static class ViewHolder {
         ImageView img_blue;
         TextView txt_name;
