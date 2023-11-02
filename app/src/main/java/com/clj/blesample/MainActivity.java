@@ -50,7 +50,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
+/**
+ * findViewById 把控件找出来转换成view
+ * activity跳转  新的activity必须在清单文件注册
+ * 启动模式   1.清单文件设置android:launchMode="standard" 2.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+ *     standard       默认模式：标准模式  入栈出栈  打开c=>abc abcc
+ *     singleTop      顶部只有一个，栈最顶层有会复用，下下面的重复不会复用   打开c==>abc abc,打开b==>abc abcb
+ *     singleTask     栈中发现有，清除上面的activity  打开b==>abcd ab
+ *     singleInstance 全局就一个类似单利模式，如果栈没有就新建栈
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //activity与layout关联
         setContentView(R.layout.activity_main);
         initView();
 
@@ -119,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
+        //findViewById 找到控件转换成view  view是所有控件的顶层
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -133,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         layout_setting = (LinearLayout) findViewById(R.id.layout_setting);
         txt_setting = (TextView) findViewById(R.id.txt_setting);
-        txt_setting.setOnClickListener(this);
+        txt_setting.setOnClickListener(this);   //设置点击事件
         layout_setting.setVisibility(View.GONE);
         txt_setting.setText(getString(R.string.expand_search_settings));
 
@@ -162,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onDetail(BleDevice bleDevice) {
                 if (BleManager.getInstance().isConnected(bleDevice)) {
+                    //activity跳转  新的activity必须在清单文件注册
                     Intent intent = new Intent(MainActivity.this, OperationActivity.class);
                     intent.putExtra(OperationActivity.KEY_DATA, bleDevice);
                     startActivity(intent);
